@@ -9,7 +9,7 @@
 #
 
 # Source PX4 parameters and configuration
-. ${R}/etc/init.d/rc.uuv_defaults
+. ${R}/etc/init.d/rc.usv_defaults
 
 PX4_SIMULATOR=${PX4_SIMULATOR:=gz}
 PX4_GZ_WORLD=${PX4_GZ_WORLD:=sydney_regatta}
@@ -92,22 +92,6 @@ param set-default CA_ROTOR5_KM 0
 param set-default CA_ROTOR5_PX 0.12
 param set-default CA_ROTOR5_PY -0.22
 param set-default CA_ROTOR5_PZ 0
-
-param set-default CA_ROTOR6_AX 0
-param set-default CA_ROTOR6_AY 0
-param set-default CA_ROTOR6_AZ 1
-param set-default CA_ROTOR6_KM 0
-param set-default CA_ROTOR6_PX -0.12
-param set-default CA_ROTOR6_PY 0.22
-param set-default CA_ROTOR6_PZ 0
-
-param set-default CA_ROTOR7_AX 0
-param set-default CA_ROTOR7_AY 0
-param set-default CA_ROTOR7_AZ 1
-param set-default CA_ROTOR7_KM 0
-param set-default CA_ROTOR7_PX -0.12
-param set-default CA_ROTOR7_PY -0.22
-param set-default CA_ROTOR7_PZ 0
 
 param set-default SIM_GZ_EC_FUNC1 101
 param set-default SIM_GZ_EC_FUNC2 102
