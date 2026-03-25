@@ -10,9 +10,6 @@ set VEHICLE_TYPE usv
 # MAV_TYPE_SURFACE_BOAT 14
 param set-default MAV_TYPE 14
 
-# Set vehicle type
-param set-default VEHICLE_TYPE 3
-
 # Disable preflight disarm for surface operation
 param set-default COM_DISARM_PRFLT -1
 param set-default CBRK_SUPPLY_CHK 894281
@@ -26,7 +23,6 @@ param set-default EKF2_HGT_REF 3
 
 # Navigation parameters for surface vehicle
 param set-default NAV_ACC_RAD 2.0
-param set-default NAV_ALTITUDE_AGE 1000
 
 # Disable unnecessary failsafes for surface operation
 param set-default COM_ACT_FAIL_ACT 0
