@@ -1,8 +1,8 @@
 #!/bin/sh
 #
-# @name BlueROV2 Heavy
+# @name WAM-V
 #
-# @type UUV
+# @type USV
 #
 # @maintainer Pedro Roque <padr@kth.se>
 # @maintainer Nicola De Carli <ndc@kth.se>
