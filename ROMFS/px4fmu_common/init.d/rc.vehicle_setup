@@ -95,7 +95,14 @@ then
 	. ${R}etc/init.d/rc.uuv_apps
 fi
 
-
+#
+# USV setup
+#
+if [ $VEHICLE_TYPE = usv ]
+then
+	# Start standard USV apps.
+	. ${R}etc/init.d/rc.usv_apps
+fi
 
 #
 # Generic setup (autostart ID not found).
