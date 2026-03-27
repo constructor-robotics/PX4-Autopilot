@@ -47,11 +47,13 @@
 
 #include <uORB/Subscription.hpp>
 #include <uORB/SubscriptionCallback.hpp>
+#include <uORB/Publication.hpp>
 #include <uORB/topics/manual_control_setpoint.h>
+#include <uORB/topics/parameter_update.h>
 #include <uORB/topics/vehicle_status.h>
 #include <uORB/topics/vehicle_control_mode.h>
 #include <uORB/topics/vehicle_thrust_setpoint.h>
-#include <uORB/topics/vehicle_attitude_setpoint.h>
+#include <uORB/topics/vehicle_torque_setpoint.h>
 
 namespace usv_control
 {
@@ -79,16 +81,19 @@ private:
 	uORB::SubscriptionCallbackWorkItem _manual_control_sub{this, ORB_ID(manual_control_setpoint)};
 	uORB::Subscription _vehicle_status_sub{ORB_ID(vehicle_status)};
 	uORB::Subscription _vehicle_control_mode_sub{ORB_ID(vehicle_control_mode)};
+	uORB::Subscription _parameter_update_sub{ORB_ID(parameter_update)};
 
 	// Publications
 	uORB::Publication<vehicle_thrust_setpoint_s> _thrust_setpoint_pub{ORB_ID(vehicle_thrust_setpoint)};
-	uORB::Publication<vehicle_attitude_setpoint_s> _attitude_setpoint_pub{ORB_ID(vehicle_attitude_setpoint)};
+	uORB::Publication<vehicle_torque_setpoint_s> _torque_setpoint_pub{ORB_ID(vehicle_torque_setpoint)};
 
 	// Parameters
-	ParamFloat<px4::params::USV_THRUST_MAX> _param_thrust_max{this, "USV_THRUST_MAX"};
-	ParamFloat<px4::params::USV_YAW_RATE_MAX> _param_yaw_rate_max{this, "USV_YAW_RATE_MAX"};
-	ParamFloat<px4::params::USV_YAW_EXPO> _param_yaw_expo{this, "USV_YAW_EXPO"};
-	ParamFloat<px4::params::USV_THRUST_EXPO> _param_thrust_expo{this, "USV_THRUST_EXPO"};
+	DEFINE_PARAMETERS(
+		(ParamFloat<px4::params::USV_THRUST_MAX>) _param_thrust_max,
+		(ParamFloat<px4::params::USV_YAW_RATE_MAX>) _param_yaw_rate_max,
+		(ParamFloat<px4::params::USV_YAW_EXPO>) _param_yaw_expo,
+		(ParamFloat<px4::params::USV_THRUST_EXPO>) _param_thrust_expo
+	)
 
 	// State
 	vehicle_control_mode_s _vehicle_control_mode{};
@@ -99,7 +104,7 @@ private:
 
 	// Helper functions
 	float applyExpo(float value, float expo);
-	void generateThrustSetpoint();
+	void generateThrustSetpoint(const manual_control_setpoint_s &manual_control);
 };
 
 } // namespace usv_control

@@ -32,10 +32,10 @@
 ############################################################################
 
 px4_add_module(
-	MODULE modules::usv_control
+	MODULE modules__usv_control
 	MAIN usv_control
-	COMPILE_LIB
-	SOURCES
+	SRCS
 		USVControl.cpp
-	DEPENDS
-	)
+	MODULE_CONFIG
+		module.yaml
+)

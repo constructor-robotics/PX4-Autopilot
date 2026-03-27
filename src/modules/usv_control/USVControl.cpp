@@ -53,21 +53,24 @@ USVControl::~USVControl()
 
 int USVControl::task_spawn(int argc, char *argv[])
 {
-	_usv_control = new USVControl();
+	USVControl *instance = new USVControl();
 
-	if (_usv_control == nullptr) {
+	if (instance) {
+		_object.store(instance);
+		_task_id = task_id_is_work_queue;
+
+		if (instance->init()) {
+			return PX4_OK;
+		}
+
+		delete instance;
+		_object.store(nullptr);
+	} else {
 		PX4_ERR("alloc failed");
-		return -1;
 	}
 
-	if (_usv_control->init() != true) {
-		delete _usv_control;
-		_usv_control = nullptr;
-		PX4_ERR("init failed");
-		return -1;
-	}
-
-	return 0;
+	_task_id = -1;
+	return PX4_ERROR;
 }
 
 int USVControl::custom_command(int argc, char *argv[])
@@ -117,16 +120,17 @@ void USVControl::Run()
 	if (_vehicle_status_sub.updated()) {
 		_vehicle_status_sub.copy(&_vehicle_status);
 	}
-
+	printf("test print \n");
 	if (_manual_control_sub.updated()) {
 		manual_control_setpoint_s manual_control{};
 		_manual_control_sub.copy(&manual_control);
-
+		printf("First Manual Flag \n");
 		// Check if armed and in manual mode
 		if (_vehicle_control_mode.flag_armed &&
 		    (_vehicle_control_mode.flag_control_manual_enabled ||
 		     _vehicle_control_mode.flag_control_rates_enabled)) {
-			generateThrustSetpoint();
+			printf("starting generate thrust setpoints \n");
+			generateThrustSetpoint(manual_control);
 		}
 	}
 
@@ -147,11 +151,8 @@ float USVControl::applyExpo(float value, float expo)
 	return powf(value, expo);
 }
 
-void USVControl::generateThrustSetpoint()
+void USVControl::generateThrustSetpoint(const manual_control_setpoint_s &manual_control)
 {
-	manual_control_setpoint_s manual_control{};
-	_manual_control_sub.copy(&manual_control);
-
 	vehicle_thrust_setpoint_s thrust_setpoint{};
 	thrust_setpoint.timestamp = hrt_absolute_time();
 
@@ -169,18 +170,21 @@ void USVControl::generateThrustSetpoint()
 
 	// Set thrust setpoints
 	// For surface vehicle: X = forward thrust, Y = lateral thrust
-	thrust_setpoint.x = thrust_x;
-	thrust_setpoint.y = 0.0f;  // No lateral thrust in basic mode
-	thrust_setpoint.z = 0.0f;  // No vertical thrust (surface vehicle)
+	thrust_setpoint.xyz[0] = thrust_x;
+	thrust_setpoint.xyz[1] = 0.0f;  // No lateral thrust in basic mode
+	thrust_setpoint.xyz[2] = 0.0f;  // No vertical thrust (surface vehicle)
 
-	// Set yaw rate setpoint
-	vehicle_attitude_setpoint_s attitude_setpoint{};
-	attitude_setpoint.timestamp = thrust_setpoint.timestamp;
-	attitude_setpoint.yaw_sp_move = yaw_rate;
+	// Set torque setpoints
+	// For surface vehicle: only yaw torque (roll/pitch stay level)
+	vehicle_torque_setpoint_s torque_setpoint{};
+	torque_setpoint.timestamp = thrust_setpoint.timestamp;
+	torque_setpoint.xyz[0] = 0.0f;  // No roll torque (surface vehicle stays level)
+	torque_setpoint.xyz[1] = 0.0f;  // No pitch torque (surface vehicle stays level)
+	torque_setpoint.xyz[2] = yaw_rate;  // Yaw torque
 
 	// Publish setpoints
 	_thrust_setpoint_pub.publish(thrust_setpoint);
-	_attitude_setpoint_pub.publish(attitude_setpoint);
+	_torque_setpoint_pub.publish(torque_setpoint);
 }
 
 } // namespace usv_control
